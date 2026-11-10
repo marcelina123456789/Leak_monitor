@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Baza danych PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: leak_monitor_db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: leak_monitor
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Kolejka zadań Redis (dla BullMQ)
+  redis:
+    image: redis:alpine
+    container_name: leak_monitor_redis
+    restart: always
+    ports:
+      - "6378:6379"
+
+  # Silnik wyszukiwania Elasticsearch
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+    container_name: leak_monitor_elastic
+    restart: always
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9201:9200"
+    volumes:
+      - elastic_data:/usr/share/elasticsearch/data
+
+volumes:
+  postgres_data:
+  elastic_data:

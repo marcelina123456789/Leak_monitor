@@ -1,0 +1,19 @@
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
+
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      // Klucz identyczny jak w AuthModule – teraz weryfikacja musi się udać
+      secretOrKey: 'SECRET_KEY_123',
+    });
+  }
+
+  async validate(payload: any) {
+    return { id: payload.sub, email: payload.email };
+  }
+}
